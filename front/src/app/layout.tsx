@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import SideBar from '@/components/SideBar';
+import { headers } from 'next/headers';
+import { cookieToInitialState } from 'wagmi';
+import Web3ModalProvider from '@/components/Web3ModalProvider';
+import { config } from '@/config';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -12,12 +16,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialState = cookieToInitialState(config, headers().get('cookie'));
   return (
     <html lang='en'>
       <body>
         <main className='flex'>
-          <SideBar />
-          <div className='bg-gray-100 w-full'>{children}</div>
+          <Web3ModalProvider initialState={initialState}>
+            <SideBar />
+            <div className='bg-gray-100 w-full'>{children}</div>
+          </Web3ModalProvider>
         </main>
       </body>
     </html>

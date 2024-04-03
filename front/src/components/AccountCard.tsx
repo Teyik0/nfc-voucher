@@ -1,16 +1,27 @@
+'use client';
+
 import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, RefreshCcw } from 'lucide-react';
+import { Copy } from 'lucide-react';
+
+import { useAccount } from 'wagmi';
+import { useBalance } from 'wagmi';
+import { useEffect, useState } from 'react';
 
 export default function AccountCard() {
+  const { address } = useAccount();
+  const [balance, setBalance] = useState(0);
+  const result = useBalance({
+    address: address,
+  });
+  useEffect(() => {
+    setBalance(Number(result.data?.formatted) || 0);
+    console.log(result.data);
+  }, [address, result]);
   return (
     <Card>
       <CardHeader className='flex flex-row items-center space-y-0'>
         <CardTitle>Account</CardTitle>
-        <Button className='ml-auto h-8 w-8' size='icon' variant='secondary'>
-          <RefreshCcw />
-          <span className='sr-only'>Refresh</span>
-        </Button>
       </CardHeader>
       <CardContent className='flex flex-col text-sm'>
         <div>
@@ -20,13 +31,11 @@ export default function AccountCard() {
               <Copy size={16} strokeWidth={1.5} />
             </Button>
           </div>
-          <code className='text-xs select-all'>
-            0x5a4E8a7f0e6d7b5fF6D8dE5b9c2dC2bDc3c8A3b1
-          </code>
+          <code className='text-xs select-all'>{address}</code>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 mt-4'>
           <strong>Balance</strong>
-          <span>3.1416 ETH</span>
+          <span>{balance} ETH</span>
         </div>
       </CardContent>
     </Card>

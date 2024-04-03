@@ -1,19 +1,19 @@
 import AccountCard from '@/components/AccountCard';
-import NewAccountCard from '@/components/NewAccountCard';
-import SendTransactionCard from '@/components/SendTransactionCard';
+import CreatePrePaidCard from '@/components/CreatePrePaidCard';
 import TransactionCard from '@/components/TransactionCard';
 
-export default function Home() {
+const page = () => {
   return (
     <div className='p-4'>
       <div className='bg-white p-6 rounded-md shadow-md min-h-[calc(100vh-2rem)]'>
         <div className='grid grid-cols-2 gap-4'>
           <AccountCard />
           <TransactionCard />
-          <SendTransactionCard />
-          <NewAccountCard />
+          <CreatePrePaidCard />
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default page;

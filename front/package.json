@@ -13,6 +13,10 @@
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
+    "@tanstack/react-query": "^5.28.14",
+    "@types/uuid": "^9.0.8",
+    "@web3modal/siwe": "^4.1.4",
+    "@web3modal/wagmi": "^4.1.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.364.0",
@@ -20,7 +24,10 @@
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.2.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^9.0.1",
+    "viem": "^2.9.8",
+    "wagmi": "^2.5.18"
   },
   "devDependencies": {
     "@types/node": "^20",

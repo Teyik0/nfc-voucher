@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard } from 'lucide-react';
+import { HandCoins, LayoutDashboard, PackagePlus } from 'lucide-react';
+import ConnectButton from './ConnectButton';
 
 const SideBar = () => {
   const pathname = usePathname();
   const styleItem = `flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900  
   transition-all hover:text-gray-900`;
+
   return (
     <div className='flex flex-col justify-between h-screen min-h-screen bg-gray-100 py-4 pl-4'>
       <div>
@@ -20,74 +22,30 @@ const SideBar = () => {
                   href='/'
                 >
                   <LayoutDashboard />
-                  <span className=''>Account Abstraction</span>
+                  <span className=''>NFC Voucher</span>
                 </Link>
               </div>
+              <ConnectButton />
               <div className='flex-1'>
-                <nav className='grid items-start text-sm font-medium'>
+                <nav className='grid items-start text-sm font-medium gap-2'>
                   <Link
                     className={`${styleItem} ${
                       pathname === '/' && 'bg-gray-300'
                     }`}
                     href='/'
                   >
-                    <LayoutDashboard size={18} />
-                    Dashboard
-                  </Link>
-                  {/* <Link
-                    className={`${styleItem} ${
-                      pathname === '/products' && 'bg-gray-300'
-                    }`}
-                    href='/products'
-                  >
-                    <Package size={20} />
-                    Browse products
+                    <PackagePlus size={18} />
+                    Create
                   </Link>
                   <Link
                     className={`${styleItem} ${
-                      pathname === '/products/new' && 'bg-gray-300'
+                      pathname === '/claim' && 'bg-gray-300'
                     }`}
-                    href='/products/new'
+                    href='/claim'
                   >
-                    <Package size={20} />
-                    New products
+                    <HandCoins size={18} />
+                    Claim
                   </Link>
-                  <Link
-                    className={`${styleItem} ${
-                      pathname === '/customers' && 'bg-gray-300'
-                    }`}
-                    href='/customers'
-                  >
-                    <Users size={20} />
-                    Customers
-                  </Link> */}
-                  {/* <Link
-                    className={`${styleItem} ${
-                      pathname === '/orders' && 'bg-gray-300'
-                    }`}
-                    href='/orders'
-                  >
-                    <ShoppingCart size={20} />
-                    Orders
-                  </Link>
-                  <Link
-                    className={`${styleItem} ${
-                      pathname === '/analytics' && 'bg-gray-300'
-                    }`}
-                    href='/analytics'
-                  >
-                    <LineChart size={20} />
-                    Analytics
-                  </Link>
-                  <Link
-                    className={`${styleItem} ${
-                      pathname === '/settings' && 'bg-gray-300'
-                    }`}
-                    href='/settings'
-                  >
-                    <Settings size={20} />
-                    Settings
-                  </Link> */}
                 </nav>
               </div>
             </div>
