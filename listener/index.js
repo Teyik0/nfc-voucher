@@ -14,12 +14,14 @@ const io = new Server(server, {
 });
 
 const nfc = new NFC();
+let lastCardUid = '';
 
 nfc.on('reader', reader => {
     console.log(`${reader.reader.name} device attached`);
 
     reader.on('card', async (card) => {
         console.log(`Card detected`, card);
+        lastCardUid = card.uid;
 
         try {
             const key = Buffer.from("FFFFFFFFFFFF", "hex");
@@ -49,6 +51,12 @@ nfc.on('reader', reader => {
         console.log(`Reader ${reader.reader.name} removed`);
     });
 
+    reader.on('card.off', (card) => {
+        console.log(`Card removed`, card);
+        // Envoie une notification de retrait de carte via WebSocket
+        io.emit('cardRemoved', { uid: lastCardUid });
+    });
+
     io.on('connection', (socket) => {
         socket.on('writeToCard', async (data) => {
             console.log('Data to write:', data);
@@ -66,7 +74,11 @@ nfc.on('reader', reader => {
                 await reader.write(blockNumber, dataBuffer, 16);
                 console.log("Écriture réussie");
 
-                socket.emit('writeSuccess', `Data written to the card: ${data}`);
+                // Lire les données après écriture pour confirmer
+                const dataRead = await reader.read(blockNumber, 16);
+                console.log("Data read from the card:", dataRead.toString('ascii'));
+
+                socket.emit('writeSuccess', { uid: lastCardUid, data: dataRead.toString('ascii') });
             } catch (err) {
                 console.error('Error writing to card:', err);
                 socket.emit('writeError', `Error writing to card: ${err.message}`);

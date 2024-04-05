@@ -31,10 +31,22 @@ const test: React.FC = () => {
                 atr: data.data
             });
         });
-
-        // Clean up on component unmount
         return () => {
           socket.off('cardDetected');
+        };
+    }, []);
+
+    useEffect(() => {
+        socket.on('writeSuccess', (data: { uid: string; data: string }) => {
+            console.log('card writed successfully:', data);
+            setCardInfo({
+                uid: data.uid,
+                atr: data.data
+            });
+        });
+
+        return () => {
+          socket.off('writeSuccess');
         };
     }, []);
 
