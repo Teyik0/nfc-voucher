@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 contract Voucher {
     address public owner;
@@ -24,20 +24,20 @@ contract Voucher {
     }
 
     // Fonction pour réclamer un voucher
-    function claimVoucher(string memory _code) public {
+    function claimVoucher(string memory _code,address _to) public {
         bytes32 codeHash = keccak256(abi.encodePacked(_code));
         uint amount = vouchers[codeHash];
         require(amount > 0, "Voucher invalide ou deja utilise");
         require(address(this).balance >= amount, "Contrat insuffisamment finance");
         
         vouchers[codeHash] = 0; 
-        payable(msg.sender).transfer(amount);
+        payable(_to).transfer(amount);
     }
 
 
     receive() external payable {}
 
-    // Fonction permettant au propriétaire de retirer les ethers du contrat
+    // Fonction permettant au propriétaire de retirer les ethers du contrat si besoin
     function withdraw() public isOwner {
         payable(owner).transfer(address(this).balance);
     }
