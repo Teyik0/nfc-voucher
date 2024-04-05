@@ -10,4 +10,6 @@ export interface CardInfo {
   atr: string;
 }
 
-export const contractAddress = '0xAB952be45398Bc263034167b9cd8Df401a49e9fF';
+export const contractAddress = '0x0F68D53B7AD492c6e87d1F3A3175293992125ad1';
+
+export const paymasterEndpoint = 'http://localhost:3002';

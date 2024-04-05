@@ -20,21 +20,53 @@ import { Button } from './ui/button';
 import { Label } from './ui/label';
 
 import { useEffect, useState } from 'react';
-import { CardInfo } from '@/lib/utils';
+import { CardInfo, paymasterEndpoint } from '@/lib/utils';
 import { CreditCard } from 'lucide-react';
 import io from 'socket.io-client';
+import { useAccount } from 'wagmi';
+import { toast } from 'sonner';
+import { set } from 'zod';
 
 const socket = io('http://localhost:3001');
 
 const ClaimCard = () => {
+  const { address } = useAccount();
   const [open, setOpen] = useState(false);
   const [cardInfo, setCardInfo] = useState<CardInfo>({ uid: '', atr: '' });
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClick = () => {
+    if (!address) {
+      toast.error('Connect to your wallet first');
+      return;
+    }
     setOpen(true);
   };
-  const handleValidate = () => {};
+
+  const handleValidate = () => {
+    setIsLoading(true);
+    fetch(`http://localhost:3002/claim`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code: cardInfo.uid, dest: address }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          toast.error(data.error);
+        } else {
+          toast.success('Claimed successfully');
+        }
+        setIsLoading(false);
+        setOpen(false);
+      });
+  };
+
   const handleCancel = () => {
     setOpen(false);
+    toast.error('Claim canceled');
   };
 
   useEffect(() => {
@@ -107,12 +139,22 @@ const ClaimCard = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              {cardInfo && (
-                <Button onClick={() => handleValidate()}>Valider</Button>
+              {isLoading ? (
+                <div className='flex justify-center items-center'>
+                  <div
+                    className={`animate-spin rounded-full h-8 w-8 border-b-2 border-red-700`}
+                  />
+                </div>
+              ) : (
+                <div>
+                  {cardInfo && (
+                    <Button onClick={() => handleValidate()}>Valider</Button>
+                  )}
+                  <Button onClick={() => handleCancel()} variant='outline'>
+                    Cancel
+                  </Button>
+                </div>
               )}
-              <Button onClick={() => handleCancel()} variant='outline'>
-                Cancel
-              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

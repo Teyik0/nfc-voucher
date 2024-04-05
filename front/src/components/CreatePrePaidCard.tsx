@@ -50,7 +50,7 @@ const CreatePrePaidCard = () => {
     setBalance(Number(result.data?.formatted) || 0);
   }, [address, result]);
 
-  const { writeContract } = useWriteContract();
+  const { writeContract, isPending, isSuccess } = useWriteContract();
 
   const handleClick = () => {
     try {
@@ -171,12 +171,22 @@ const CreatePrePaidCard = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              {cardInfo && (
-                <Button onClick={() => handleValidate()}>Valider</Button>
+              {!isPending ? (
+                <div className='flex gap-4'>
+                  {cardInfo && (
+                    <Button onClick={() => handleValidate()}>Valider</Button>
+                  )}
+                  <Button onClick={() => handleCancel()} variant='outline'>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className='flex justify-center items-center'>
+                  <div
+                    className={`animate-spin rounded-full h-8 w-8 border-b-2 border-red-700`}
+                  />
+                </div>
               )}
-              <Button onClick={() => handleCancel()} variant='outline'>
-                Cancel
-              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
