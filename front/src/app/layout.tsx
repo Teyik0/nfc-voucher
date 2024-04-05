@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { cookieToInitialState } from 'wagmi';
 import Web3ModalProvider from '@/components/Web3ModalProvider';
 import { config } from '@/config';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body>
         <main className='flex'>
           <Web3ModalProvider initialState={initialState}>
+            <Toaster />
             <SideBar />
             <div className='bg-gray-100 w-full'>{children}</div>
           </Web3ModalProvider>

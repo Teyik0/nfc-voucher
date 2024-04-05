@@ -34,18 +34,18 @@ const SideBar = () => {
                     }`}
                     href='/'
                   >
-                    <PackagePlus size={18} />
-                    Create
+                    <HandCoins size={18} />
+                    Dashboard
                   </Link>
-                  <Link
+                  {/* <Link
                     className={`${styleItem} ${
                       pathname === '/claim' && 'bg-gray-300'
                     }`}
                     href='/claim'
                   >
-                    <HandCoins size={18} />
+                    <PackagePlus size={18} />
                     Claim
-                  </Link>
+                  </Link> */}
                 </nav>
               </div>
             </div>

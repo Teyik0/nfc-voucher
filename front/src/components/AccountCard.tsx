@@ -16,7 +16,6 @@ export default function AccountCard() {
   });
   useEffect(() => {
     setBalance(Number(result.data?.formatted) || 0);
-    console.log(result.data);
   }, [address, result]);
   return (
     <Card>

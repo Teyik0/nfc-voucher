@@ -1,4 +1,5 @@
 import AccountCard from '@/components/AccountCard';
+import ClaimCard from '@/components/ClaimCard';
 import CreatePrePaidCard from '@/components/CreatePrePaidCard';
 import TransactionCard from '@/components/TransactionCard';
 
@@ -10,6 +11,7 @@ const page = () => {
           <AccountCard />
           <TransactionCard />
           <CreatePrePaidCard />
+          <ClaimCard />
         </div>
       </div>
     </div>
