@@ -1,39 +1,84 @@
-import { NFC } from 'nfc-pcsc';
+import express from 'express';
+import http from 'http';
+import { NFC, KEY_TYPE_A } from 'nfc-pcsc';
+import { Server } from "socket.io";
 
-const nfc = new NFC(); // optionally you can pass logger
+const app = express();
+const server = http.createServer(app);
 
-nfc.on('reader', (reader) => {
-  console.log(`${reader.reader.name}  device attached`);
-
-  // enable when you want to auto-process ISO 14443-4 tags (standard=TAG_ISO_14443_4)
-  // when an ISO 14443-4 is detected, SELECT FILE command with the AID is issued
-  // the response is available as card.data in the card event
-  // see examples/basic.js line 17 for more info
-  // reader.aid = 'F222222222';
-
-  reader.on('card', (card) => {
-    // card is object containing following data
-    // [always] String type: TAG_ISO_14443_3 (standard nfc tags like MIFARE) or TAG_ISO_14443_4 (Android HCE and others)
-    // [always] String standard: same as type
-    // [only TAG_ISO_14443_3] String uid: tag uid
-    // [only TAG_ISO_14443_4] Buffer data: raw data from select APDU response
-
-    console.log(`${reader.reader.name}  card detected`, card);
-  });
-
-  reader.on('card.off', (card) => {
-    console.log(`${reader.reader.name}  card removed`, card);
-  });
-
-  reader.on('error', (err) => {
-    console.log(`${reader.reader.name}  an error occurred`, err);
-  });
-
-  reader.on('end', () => {
-    console.log(`${reader.reader.name}  device removed`);
-  });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
-nfc.on('error', (err) => {
-  console.log('an error occurred', err);
+const nfc = new NFC();
+
+nfc.on('reader', reader => {
+    console.log(`${reader.reader.name} device attached`);
+
+    reader.on('card', async (card) => {
+        console.log(`Card detected`, card);
+
+        try {
+            const key = Buffer.from("FFFFFFFFFFFF", "hex");
+            const blockNumber = 4; // Le bloc où les données ont été écrites précédemment
+
+            await reader.authenticate(blockNumber, KEY_TYPE_A, key);
+            console.log("Authentification réussie pour la lecture");
+
+            const dataRead = await reader.read(blockNumber, 16); // Assurez-vous que la taille est correcte
+            console.log("Data read from the card:", dataRead.toString('ascii')); // Affiche les données lues
+
+            console.log("Data read from the card:", dataRead);
+            console.log("Hex representation:", dataRead.toString('hex'));
+
+            // Envoie les données lues via WebSocket
+            io.emit('cardDetected', { uid: card.uid, data: dataRead.toString('ascii') });
+        } catch (err) {
+            console.error('Error reading from card:', err);
+        }
+    });
+
+    reader.on('error', err => {
+        console.error(`Error occurred`, err);
+    });
+
+    reader.on('end', () => {
+        console.log(`Reader ${reader.reader.name} removed`);
+    });
+
+    io.on('connection', (socket) => {
+        socket.on('writeToCard', async (data) => {
+            console.log('Data to write:', data);
+            const blockSize = 16;
+            let dataBuffer = Buffer.alloc(blockSize, ' '); 
+            dataBuffer.write(data, 0, 'ascii'); 
+
+            try {
+                const key = Buffer.from("FFFFFFFFFFFF", "hex");
+                const blockNumber = 4;
+
+                await reader.authenticate(blockNumber, KEY_TYPE_A, key);
+                console.log("Authentification réussie");
+
+                await reader.write(blockNumber, dataBuffer, 16);
+                console.log("Écriture réussie");
+
+                socket.emit('writeSuccess', `Data written to the card: ${data}`);
+            } catch (err) {
+                console.error('Error writing to card:', err);
+                socket.emit('writeError', `Error writing to card: ${err.message}`);
+            }
+        });
+    });
+});
+
+nfc.on('error', err => {
+    console.error(`An error occurred`, err);
+});
+
+server.listen(3001, () => {
+    console.log('NFC Server running on http://localhost:3001');
 });
