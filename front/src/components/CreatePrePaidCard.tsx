@@ -3,21 +3,12 @@
 import { useState, useEffect } from 'react';
 
 import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from './ui/input-otp';
-import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from './ui/button';
 import {
@@ -31,8 +22,10 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from 'zod';
+import { set, z } from 'zod';
 import { toast } from 'sonner';
+import { useAccount, useBalance } from 'wagmi';
+import { CreditCard } from 'lucide-react';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:3001');
@@ -47,13 +40,24 @@ const schema = z.number().positive();
 const CreatePrePaidCard = () => {
   const [amount, setAmount] = useState('0');
   const [open, setOpen] = useState(false);
-  const [badge, setBadge] = useState<string | null>('test-badge');
   const [cardInfo, setCardInfo] = useState<CardInfo>({ uid: '', atr: '' });
   const [inputData, setInputData] = useState<string>('');
 
+  const { address } = useAccount();
+  const [balance, setBalance] = useState(0);
+  const result = useBalance({
+    address: address,
+  });
+  useEffect(() => {
+    setBalance(Number(result.data?.formatted) || 0);
+  }, [address, result]);
+
   const handleClick = () => {
     try {
-      schema.parse(parseFloat(amount));
+      if (!address) throw new Error('Connect to your wallet first');
+      const amountParsed: number = schema.parse(parseFloat(amount));
+      if (balance < amountParsed) throw new Error('Insufficient funds');
+      setOpen(true);
     } catch (err: any) {
       toast.error('Error', {
         description: err.message,
@@ -61,13 +65,27 @@ const CreatePrePaidCard = () => {
       setOpen(false);
       return;
     }
+  };
 
-    setOpen(true);
-    const cardId = uuidv4().slice(0, 8);
-    socket.emit('writeToCard', cardId);
-    toast.success('Success', {
-      description: `Pre paid card created with id: ${cardId}`,
-    });
+  const handleCancel = () => {
+    setOpen(false);
+    setAmount('0');
+    toast.error('Scan has not been completed');
+  };
+
+  const handleValidate = () => {
+    try {
+      const cardId = uuidv4().slice(0, 8);
+      const cardId = uuidv4().slice(0, 8);
+      socket.emit('writeToCard', cardId);
+      toast.success('Success', {
+        description: `Pre paid card created with id: ${uuidv4()}, amount: ${amount} and badge: ${cardInfo}`,
+      });
+    } catch (error: any) {
+      toast.error('Error', {
+        description: error.message,
+      });
+    }
   };
 
   useEffect(() => {
@@ -132,21 +150,22 @@ useEffect(() => {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Scan your badge</AlertDialogTitle>
-              <AlertDialogDescription className='flex flex-col gap-8 m-auto items-center justify-center'>
-                <img src='/spinner.gif' alt='spinner' className='w-24 h-24' />
-                <h1>Données de la carte NFC</h1>
-                <p>UID: {cardInfo.uid}</p>
-                <p>ATR: {cardInfo.atr}</p>
+              <AlertDialogDescription className='flex flex-col gap-8 m-auto items-center justify-center pt-4'>
+                {cardInfo ? (
+                  <div className='flex gap-8 items-center '>
+                    <CreditCard size={64} className='rotate-12' />
+                    <Label htmlFor='badge'>card uid: 2424</Label>
+                  </div>
+                ) : (
+                  <img src='/spinner.gif' alt='spinner' className='w-24 h-24' />
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <Button
-                onClick={() => {
-                  setOpen(false);
-                  toast.error('Scan has not been completed');
-                }}
-                variant='outline'
-              >
+              {cardInfo && (
+                <Button onClick={() => handleValidate()}>Valider</Button>
+              )}
+              <Button onClick={() => handleCancel()} variant='outline'>
                 Cancel
               </Button>
             </AlertDialogFooter>
