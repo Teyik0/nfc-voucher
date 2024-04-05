@@ -8,6 +8,9 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "nfc-pcsc": "^0.8.1"
+    "express": "^4.19.2",
+    "http": "^0.0.1-security",
+    "nfc-pcsc": "^0.8.1",
+    "socket.io": "^4.7.5"
   }
 }
